@@ -66,39 +66,46 @@ export class ExchangeFormComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.setCurrencies();
-
-    this.getCurrencyControl.valueChanges
-      .pipe(
-        debounceTime(50),
-        map((value) => +value),
-        filter((value): value is number => typeof value === 'number' && !!value)
-      )
-      .subscribe((value) => {
-        const maxGiveValue = this.selectedGiveCurrency?.max ?? Number.MAX_VALUE;
-        const reserve = this.selectedGetCurrency?.reserve;
-        const rate = this.selectedGetCurrency?.rate;
-        if (reserve && rate) {
-          const newMaxGiveValue = Math.min(
-            maxGiveValue,
-            reserve / rate,
-            Number.MAX_VALUE
-          );
-          const newGiveValue = value / rate;
-
-          this.giveCurrencyControl.setValue(
-            Math.min(newGiveValue, newMaxGiveValue),
-            { emitEvent: true }
-          );
-        }
-      });
   }
 
-  public updateCurrencies(): void {
+  public updateOnGetCurrency(): void {
     let value =
-      typeof this.giveCurrencyControl.value === 'number'
-        ? this.giveCurrencyControl.value
+      typeof this.getCurrencyControl.value === 'string'
+        ? +this.getCurrencyControl.value
         : null;
-    if (value === null) {
+    if (value === null || Number.isNaN(value)) {
+      return;
+    }
+
+    const maxGiveValue = this.selectedGiveCurrency?.max ?? Number.MAX_VALUE;
+    const reserve = this.selectedGetCurrency?.reserve;
+    const rate = this.selectedGetCurrency?.rate;
+    if (reserve && rate) {
+      const newMaxGiveValue = Math.min(
+        maxGiveValue,
+        reserve / rate,
+        Number.MAX_VALUE
+      );
+      const newGiveValue = value / rate;
+
+      this.giveCurrencyControl.setValue(
+        Math.min(newGiveValue, newMaxGiveValue),
+        { emitEvent: true }
+      );
+      const getCurrencyValue = rate * Math.min(newGiveValue, newMaxGiveValue);
+      this.getCurrencyControl.setValue(getCurrencyValue, {
+        emitEvent: false,
+      });
+    }
+  }
+
+  public updateOnGiveCurrency(): void {
+    let value =
+      typeof this.giveCurrencyControl.value === 'string'
+        ? +this.giveCurrencyControl.value
+        : null;
+
+    if (value === null || Number.isNaN(value)) {
       return;
     }
     const maxGiveValue = this.selectedGiveCurrency?.max ?? Number.MAX_VALUE;
@@ -113,17 +120,20 @@ export class ExchangeFormComponent implements OnInit, OnDestroy {
     }
 
     const getCurrencyRate = this.selectedGetCurrency?.rate;
+    const getCurrencyReserve = this.selectedGetCurrency?.reserve || 0;
     if (getCurrencyRate) {
       const getCurrencyValue = getCurrencyRate * value;
       const getCurrencyReserve =
         this.selectedGetCurrency?.reserve ?? Number.MAX_VALUE;
       if (getCurrencyReserve < getCurrencyValue) {
         this.giveCurrencyControl.setValue(getCurrencyReserve / getCurrencyRate);
-        return;
       }
-      this.getCurrencyControl.setValue(getCurrencyValue, {
-        emitEvent: false,
-      });
+      this.getCurrencyControl.setValue(
+        Math.min(getCurrencyValue, getCurrencyReserve),
+        {
+          emitEvent: false,
+        }
+      );
     }
   }
 

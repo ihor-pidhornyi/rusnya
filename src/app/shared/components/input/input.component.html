@@ -10,6 +10,9 @@
     [thousandSeparator]="thousandSeparator"
     [decimalMarker]="decimalMarker"
     [name]="id"
+    [tabIndex]="0"
+    (blur)="onBlur()"
+    (focus)="onFocus()"
     class="input"
   >
   <span class="suffix" *ngIf="suffixContent">
@@ -25,6 +28,9 @@
     [class.suffixed]="!!suffixContent"
     [disabled]="disabled"
     [name]="id"
+    [tabIndex]="0"
+    (blur)="onBlur()"
+    (focus)="onFocus()"
     class="input"
   >
 </ng-template>

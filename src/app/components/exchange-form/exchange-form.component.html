@@ -49,7 +49,7 @@
         [placeholder]="''"
         [suffixContent]="currencyGiveSuffix"
         [type]="'number'"
-        (blurTriggered)="updateCurrencies()"
+        (blurTriggered)="updateOnGiveCurrency()"
       >
         <ng-template #currencyGiveSuffix>{{
           selectedGiveCurrency?.code
@@ -129,6 +129,7 @@
         [placeholder]="''"
         [suffixContent]="currencyGetSuffix"
         [type]="'number'"
+        (blurTriggered)="updateOnGetCurrency()"
       >
         <ng-template #currencyGetSuffix>
           <ng-container *ngIf="selectedGetCurrency">{{
