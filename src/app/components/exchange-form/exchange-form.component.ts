@@ -65,41 +65,6 @@ export class ExchangeFormComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.giveCurrencyControl.valueChanges
-      .pipe(
-        debounceTime(50),
-        map((value) => +value),
-        filter((value): value is number => typeof value === 'number' && !!value)
-      )
-      .subscribe((value) => {
-        const maxGiveValue = this.selectedGiveCurrency?.max ?? Number.MAX_VALUE;
-        const minGiveValue = this.selectedGiveCurrency?.min ?? 0;
-        if (value > maxGiveValue) {
-          this.giveCurrencyControl.setValue(maxGiveValue);
-          return;
-        }
-        if (value < minGiveValue) {
-          this.giveCurrencyControl.setValue(minGiveValue);
-          return;
-        }
-
-        const getCurrencyRate = this.selectedGetCurrency?.rate;
-        if (getCurrencyRate) {
-          const getCurrencyValue = getCurrencyRate * value;
-          const getCurrencyReserve =
-            this.selectedGetCurrency?.reserve ?? Number.MAX_VALUE;
-          if (getCurrencyReserve < getCurrencyValue) {
-            this.giveCurrencyControl.setValue(
-              getCurrencyReserve / getCurrencyRate
-            );
-            return;
-          }
-          this.getCurrencyControl.setValue(getCurrencyValue, {
-            emitEvent: false,
-          });
-        }
-      });
-
     this.setCurrencies();
 
     this.getCurrencyControl.valueChanges
@@ -126,6 +91,40 @@ export class ExchangeFormComponent implements OnInit, OnDestroy {
           );
         }
       });
+  }
+
+  public updateCurrencies(): void {
+    let value =
+      typeof this.giveCurrencyControl.value === 'number'
+        ? this.giveCurrencyControl.value
+        : null;
+    if (value === null) {
+      return;
+    }
+    const maxGiveValue = this.selectedGiveCurrency?.max ?? Number.MAX_VALUE;
+    const minGiveValue = this.selectedGiveCurrency?.min ?? 0;
+    if (value > maxGiveValue) {
+      this.giveCurrencyControl.setValue(maxGiveValue);
+      value = maxGiveValue;
+    }
+    if (value < minGiveValue) {
+      this.giveCurrencyControl.setValue(minGiveValue);
+      value = minGiveValue;
+    }
+
+    const getCurrencyRate = this.selectedGetCurrency?.rate;
+    if (getCurrencyRate) {
+      const getCurrencyValue = getCurrencyRate * value;
+      const getCurrencyReserve =
+        this.selectedGetCurrency?.reserve ?? Number.MAX_VALUE;
+      if (getCurrencyReserve < getCurrencyValue) {
+        this.giveCurrencyControl.setValue(getCurrencyReserve / getCurrencyRate);
+        return;
+      }
+      this.getCurrencyControl.setValue(getCurrencyValue, {
+        emitEvent: false,
+      });
+    }
   }
 
   public selectGiveCurrency(currency: Currency): void {

@@ -49,6 +49,7 @@
         [placeholder]="''"
         [suffixContent]="currencyGiveSuffix"
         [type]="'number'"
+        (blurTriggered)="updateCurrencies()"
       >
         <ng-template #currencyGiveSuffix>{{
           selectedGiveCurrency?.code
