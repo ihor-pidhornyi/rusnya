@@ -1,5 +1,4 @@
 import { OrderStatus } from './order-status';
-
 export type Order = {
   _id: string;
   from: {
